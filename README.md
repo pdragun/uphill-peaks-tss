@@ -30,4 +30,8 @@ Formula for this Uphill Athlete suggestion is:
 
 ---
 
+Live demo: [Uphill Peaks TSS](https://pdragun.github.io/uphill-peaks-tss/)
+
+---
+
 Find more at Uphill Athlete web page: [Understanding and Using the TrainingPeaks Metrics CTL and TSS](https://www.uphillathlete.com/trainingpeaks-metrics-ctl-tss/).
