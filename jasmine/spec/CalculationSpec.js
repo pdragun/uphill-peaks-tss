@@ -256,7 +256,7 @@ describe("Calculation", function() {
         }
     });
 
-    describe("TSS for height (h) & additional weight (aw) + body weight (bw) with percentage aw/bw - imperial [ft] check (_weightImperial())", function(){
+    describe("TSS for height (h) & additional weight (aw) + body weight (bw) with percentage aw/bw - imperial [ft] check (_weight())", function(){
         let args = [
             [100, 8, 80, 10, 2],
             [100, 16, 80, 20, 3],
