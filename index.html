@@ -1,0 +1,365 @@
+<!-- Copyright © 2020 Peter Dragúň jr. <peter.dragun@gmail.com>
+     This work is free. You can redistribute it and/or modify it under the
+     terms of the Do What The Fuck You Want To Public License, Version 2,
+     as published by Sam Hocevar. See the LICENSE file for more details. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Calculate additional TrainingPeaks TSS points for ascent/descent and additional weight (backpack). Idea from Uphill Athlete.">
+
+    <title>Calculate hrTSS for uphill hiking with/without additional weight</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./src/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z">
+
+    <style>
+        .hide {
+            visibility: hidden;
+        }
+
+        .show {
+            visibility: visible;
+        }
+
+        .custom-nav {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main role="main" class="container">
+    <h1>Add ascent/descent and additional weight to your hrTSS</h1>
+    <p>Calculate additional TrainingPeaks TSS points for ascent/descent and additional weight (backpack). Idea from <a href="https://www.uphillathlete.com/">Uphill Athlete</a>. For more click on "About".</p>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs custom-nav" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="form-tab" data-toggle="tab" href="#form" role="tab" aria-controls="form" aria-selected="true">Calculation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="examples-tab" data-toggle="tab" href="#examples" role="tab" aria-controls="examples" aria-selected="false">Examples</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="false">Details</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="author-tab" data-toggle="tab" href="#author" role="tab" aria-controls="author" aria-selected="false">Author</a>
+        </li>
+    </ul>
+
+    <!-- Tabs content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Form tab content-->
+        <div class="tab-pane fade show active" id="form" role="tabpanel" aria-labelledby="form-tab">
+            <form id="units">
+                <!-- Choose metric vs imperial-->
+                <div class="form-group">
+                    <p>Please choose one:</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="metric" name="units" value="metric" checked>
+                        <label class="form-check-label" for="metric">Metric system (m)</label></br>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="imperial" name="units" value="imperial">
+                        <label class="form-check-label" for="imperial">Imperial system (ft)</label>
+                    </div>
+
+                    <!-- Your TSS score from TrainingPeaks-->
+                    <div id="hrtss" class="form-group">
+                        <label for="hrtss_input">Your hrTSS score from TrainingPeaks:</label>
+                        <input class="form-control" type="number" id="hrtss_input" name="hrtss_input" min="1" max="1000" placeholder="0">
+                        <div class="error hide" id="hrtss_error"></div>
+                    </div>
+
+                    <!-- Ascent-->
+                    <div id="height" class="form-group">
+                        <label for="height_input">Ascent/descent height<span class="units_height"></span>?</label>
+                        <input class="form-control" type="number" id="height_input" name="height_input" min="1" placeholder="0" max="10000">
+                        <div class="error hide" id="height_error"></div>
+                    </div>
+
+                    <!-- Additional weight-->
+                    <div id="additional_weight" class="form-group">
+                        <label for="additional_weight_input">Additional weight:</label>
+                        <input class="form-control" type="number" id="additional_weight_input" name="additional_weight_input" min="0" placeholder="0" aria-describedby="additional_weight_help" max="1000">
+                        <small id="additional_weight_help" class="form-text text-muted">You can add weight in whatever units you want (kg, lbs, &hellip;). But please use the same unit for additional and body weight too.</small>
+                        <div class="error hide" id="additional_weight_error"></div>
+                    </div>
+
+                    <!-- Body weight-->
+                    <div id="body_weight" class="form-group">
+                        <label for="body_weight_input">What is your body weight?</label>
+                        <input class="form-control" type="number" id="body_weight_input" name="body_weight_input" placeholder="0" aria-describedby="body_weight_help" min="0" max="1000">
+                        <small id="body_weight_help" class="form-text text-muted">Please add your body weight, if you want to add additional weight to calculation.</small>
+                        <div class="error hide" id="body_weight_error"></div>
+                    </div>
+
+                    <h3>Result: <span id="result">0</span></h3>
+                </div> 
+            </form>
+        </div><!-- /Form tab content -->
+
+        <!-- About tab content -->
+        <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+            <p><a href="https://www.trainingpeaks.com/">TrainingPeaks</a> algorithm properly calculates <a href="https://www.trainingpeaks.com/blog/applying-the-numbers-part-2-training-stress-score/">TSS</a> on flat ground.
+                For mountains <a href="https://www.uphillathlete.com/">Uphill Athlete</a> suggests using Training Peaks hrTSS with addign TSS for ascent/descent and additional weight.
+                Find more at Uphill Athlete web page:
+                <a href="https://www.uphillathlete.com/trainingpeaks-metrics-ctl-tss/">Understanding and Using the TrainingPeaks Metrics CTL and TSS</a>.</p>
+            <p>This calculation is purely based on Uphill Athlete ideas:</p>
+            <h3>1. For purely aerobic run/hike/ski while carrying no to minimal weight:</h3>
+            <p><b>Calculate the TrainingPeaks hrTSS and add 10 TSS for each 1,000 vertical feet of gain.</b></p>
+            <p>Formula for this Uphill Athlete suggestion is:</p>
+            <ol>
+                <li>for ascent in meters [m]:<br>addToHrtss = (ascent * 3.048) * 10 / 1000</li>
+                <li>for ascent in feets [ft]:<br>addToHrtss = ascent * 10 / 1000</li>
+            </ol>
+            <p><b>OR</b></p>
+            <h3>2. For purely aerobic run/hike/ski while carrying more than 10 percent of body weight:</h3>
+            <p><b>Add 20 TSS/1,000 feet.</b></p>
+            <p>Formula for this Uphill Athlete suggestion is:</p>
+            <ol>
+                <li>for ascent in meters [m]:<br>addToHrtss = (ascent * 3.048 / 1000 * additionalWeight * 100 / bodyWeight) + (ascent * 3.048 * 10 / 1000)</li>
+                <li>for ascent in feets [ft]:<br>addToHrtss = (ascent / 1000 * additionalWeight * 100 / bodyWeight) + (ascent * 10 / 1000)</li>
+            </ol>
+            <hr>
+            <p>Find more at Uphill Athlete web page:
+                <a href="https://www.uphillathlete.com/trainingpeaks-metrics-ctl-tss/">Understanding and Using the TrainingPeaks Metrics CTL and TSS</a>.</p></p>
+        </div><!-- /About tab content -->
+
+        <!-- Examples tab content -->
+        <div class="tab-pane fade" id="examples" role="tabpanel" aria-labelledby="examples-tab">
+            <p>Ascent and descent is in 'feets', weight is in kilograms [kg]. Weight unit is not important, formula use only percentage (4th column).</p>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ascent/descent [ft]</th>
+                            <th scope="col">Additional weight</th>
+                            <th scope="col">Body weight</th>
+                            <th scope="col">Additional weight / body weight [%]</th>
+                            <th scope="col">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1000</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">10</th>
+                        </tr>
+                        <tr>
+                            <td>1000</td>
+                            <td>8</td>
+                            <td>80</td>
+                            <td>10</td>
+                            <th scope="row">20</th>
+                        </tr>
+                        <tr>
+                            <td>1000</td>
+                            <td>16</td>
+                            <td>80</td>
+                            <td>20</td>
+                            <th scope="row">30</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">20</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>8</td>
+                            <td>80</td>
+                            <td>10</td>
+                            <th scope="row">40</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>16</td>
+                            <td>80</td>
+                            <td>20</td>
+                            <th scope="row">60</sup></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <p>Ascent and descent is in 'meters', weight is in kilograms. Weight unit is not important, formula use only percentage (4th column).</p>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ascent/descent [m]</th>
+                            <th scope="col">Additional weight</th>
+                            <th scope="col">Body weight</th>
+                            <th scope="col">Additional weight / body weight [%]</th>
+                            <th scope="col">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>300</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">9</th>
+                        </tr>
+                        <tr>
+                            <td>300</td>
+                            <td>8</td>
+                            <td>80</td>
+                            <td>10</td>
+                            <th scope="row">18</th>
+                        </tr>
+                        <tr>
+                            <td>300</td>
+                            <td>16</td>
+                            <td>80</td>
+                            <td>20</td>
+                            <th scope="row">27</th>
+                        </tr>
+                        <tr>
+                            <td>600</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">18</th>
+                        </tr>
+                        <tr>
+                            <td>600</td>
+                            <td>8</td>
+                            <td>80</td>
+                            <td>10</td>
+                            <th scope="row">37</th>
+                        </tr>
+                        <tr>
+                            <td>600</td>
+                            <td>16</td>
+                            <td>80</td>
+                            <td>20</td>
+                            <th scope="row">55</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Ascent and descent is in 'feets', weight is in pounds [lb]. Weight unit is not important, formula use only percentage (4th column).</p>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ascent/descent [ft]</th>
+                            <th scope="col">Additional weight</th>
+                            <th scope="col">Body weight</th>
+                            <th scope="col">Additional weight / body weight [%]</th>
+                            <th scope="col">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1000</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">10</th>
+                        </tr>
+                        <tr>
+                            <td>1000</td>
+                            <td>18</td>
+                            <td>176</td>
+                            <td>10 (10.227)</td>
+                            <th scope="row">20</th>
+                        </tr>
+                        <tr>
+                            <td>1000</td>
+                            <td>36</td>
+                            <td>176</td>
+                            <td>20 (20.4545)</td>
+                            <th scope="row">30</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <th scope="row">20</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>18</td>
+                            <td>176</td>
+                            <td>10 (10.227)</td>
+                            <th scope="row">40</th>
+                        </tr>
+                        <tr>
+                            <td>2000</td>
+                            <td>36</td>
+                            <td>176</td>
+                            <td>20 (20.4545)</td>
+                            <th scope="row">61 <sup><a href="#1">1</a></sup></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p id="1"><b>1*</b> You probably think that it should be 60, but the result is correct and the difference is in percentage of additional weight vs body weight which should be 20, but is 20.4545%.</p>
+        </div><!-- /Examples tab content -->
+
+        <!-- Details tab content -->
+        <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+            <p>This is demo page for project <b>uphill-peaks-tss</b>. Jasmine tests are only for javascript <a href="./jasmine/SpecRunner.html">Calculation</a> class.</p>
+            <p>Idea for this project came from <a href="https://www.uphillathlete.com/trainingpeaks-metrics-ctl-tss/">Uphill Athlete</a>. The rest, code, this web page has been made by Peter Dragúň jr. For more about author, click on "Author" tab.</p>
+            <p>This page does not track anything. No Google Analytics, nothing. All used libraries are stored locally.</p>
+            <h2>Licence</h2>
+            <p>As been said, the idea is not my. This page use libraries and framework which have their own licences:</p>
+            <ul>
+                <li>jquery.js</li>
+                <li>popper.js</li>
+                <li>bootstrap.js</li>
+                <li>bootstrap.css</li>
+                <li>Jasmine framework</li>
+            </ul>
+            <p>The rest is under <a href="http://www.wtfpl.net/txt/copying/">WTFPL 2.0 Licence</a>, more <a href="http://www.wtfpl.net/">about WTFPL 2.0 Licence</a>.</p>
+            <h2>Warranty</h2>
+            <p><pre><code>
+            /* This program is free software. It comes without any warranty, to
+            * the extent permitted by applicable law. You can redistribute it
+            * and/or modify it under the terms of the Do What The Fuck You Want
+            * To Public License, Version 2, as published by Sam Hocevar. See
+            * http://www.wtfpl.net/ for more details. */
+            </code></pre></p>
+
+        </div><!-- /Details tab content -->
+
+        <!-- Author tab content -->
+        <div class="tab-pane fade" id="author" role="tabpanel" aria-labelledby="author-tab">
+            <p>Hi, my name is Peter Dragúň jr., mailto peter.dragun@gmail.com.</p>
+            <p>I like js, php and also mountaineering. I am from Slovakia. No from Slovenia, from Slovakia.</p>
+            <h2>Why I made this?</h2>
+            <p>It is not too complicated when you go up and down 300 height meters and you have no or very light backpack. Based on the suggestion: “<em>Calculate the TrainingPeaks hrTSS and add 10 TSS for each 1,000 vertical feet of gain.</em>”, you simply add 10 TSS.</p>
+            <p>That was easy. For heavier backpacks the suggestion is: “<em>For 1000 vertical feet and 10% additional body weight you should add 20 TSS</em>”. Question is: When you go up and down 1165 height meters with an additional 10 kg in your backpack and your weight is 80 kg – how much TSS points should you add?</p>
+            <p>So I made this simple form.</p>
+            <h3>Peter</h3>
+        </div><!-- /Author tab content -->
+
+    </div><!-- /Tabs content -->
+
+    </main><!-- /.container -->
+    
+    <!-- Bootstrap JS -->
+    <script src="./src/js/lib/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"></script>
+    <script src="./src/js/lib/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"></script>
+    <script src="./src/js/lib/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"></script>
+    
+    <!-- Application -->
+    <script type="module" src="./src/js/app.js"></script>
+</body>
+</html>
