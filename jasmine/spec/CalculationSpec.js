@@ -234,30 +234,7 @@ describe("Calculation", function() {
         });
     });
 
-    describe("TSS for height (h) - metric [m] (check _heightMetric())", function(){
-        let args = [
-            [100, 3.048],
-            [200, 6.096],
-            [500, 15.24],
-            [1000, 30.48],
-            [1100, 33.528],
-            [1200, 36.576],
-            [1500, 45.72],
-            [2000, 60.96],
-            [2500, 76.2],
-            [3000, 91.44],
-        ]
-
-        for (let i = 0; i < args.length; i++) {
-            it("TSS for h = " + args[i][0] + " should be " + args[i][1], function() {
-                calculation.height = args[i][0];
-                expect(calculation._heightMetric()).toEqual(args[i][1]);
-            });
-        }
-    });
-
-
-    describe("TSS for height (h) - imperial [ft] (check _heightImperial())", function(){
+    describe("TSS for height (h) - imperial [ft] (check _height())", function(){
         let args = [
             [100, 1],
             [200, 2],
@@ -274,41 +251,7 @@ describe("Calculation", function() {
         for (let i = 0; i < args.length; i++) {
             it("TSS for h = " + args[i][0] + " should be " + args[i][1], function() {
                 calculation.height = args[i][0];
-                expect(calculation._heightImperial()).toEqual(args[i][1]);
-            });
-        }
-    });
-
-    describe("TSS for height (h) & additional weight (aw) + body weight (bw) with percentage aw/bw - metric [m] (check _weightMetric())", function(){
-        let args = [
-            [100, 8, 80, 10, 6.096],
-            [100, 16, 80, 20, 9.144],
-            [328, 8, 80, 10, 19.994880000000002],
-            [328, 16, 80, 20, 29.992320000000003],
-            [500, 8, 80, 10, 30.48],
-            [500, 16, 80, 20, 45.72],
-            [1000, 8, 80, 10, 60.96],
-            [1000, 16, 80, 20, 91.44],
-            [1100, 8, 80, 10, 67.05600000000001],
-            [1100, 16, 80, 20, 100.584],
-            [1200, 8, 80, 10, 73.152],
-            [1200, 16, 80, 20, 109.72800000000001],
-            [1500, 8, 80, 10, 91.44],
-            [1500, 16, 80, 20, 137.16],
-            [2000, 8, 80, 10, 121.92],
-            [2000, 16, 80, 20, 182.88],
-            [2500, 8, 80, 10, 152.4],
-            [2500, 16, 80, 20, 228.60000000000002],
-            [3000, 8, 80, 10, 182.88],
-            [3000, 16, 80, 20, 274.32],
-        ];
-
-        for (let i = 0; i < args.length; i++) {
-            it("TSS for h = " + args[i][0] + ", aw = " + args[i][1] + ", bw = " + args[i][2] + " (" + args[i][3] + "%) should be " + args[i][4], function() {
-                calculation.height = args[i][0];
-                calculation.additionalWeight = args[i][1];
-                calculation.bodyWeight = args[i][2];
-                expect(calculation._weightMetric()).toEqual(args[i][4]);
+                expect(calculation._height()).toEqual(args[i][1]);
             });
         }
     });
@@ -342,31 +285,9 @@ describe("Calculation", function() {
                 calculation.height = args[i][0];
                 calculation.additionalWeight = args[i][1];
                 calculation.bodyWeight = args[i][2];
-                expect(calculation._weightImperial()).toEqual(args[i][4]);
+                expect(calculation._weight()).toEqual(args[i][4]);
             });
         }
-    });
-
-    describe("Check calcMetric()", function(){
-
-        it("Don't add weight (addition and body) to calculation if incorrect values, h = 328, aw = 0, bw = 80 should be 9.997440000000001", function() {
-            calculation.height = 328;
-            calculation.additionalWeight = 0;
-            calculation.bodyWeight = 80;
-
-            calculation.calcMetric();
-            expect(calculation._res).toEqual(9.997440000000001);
-        });
-
-        it("All values are correct, h = 328, aw = 8, bw = 80 should be 19.994880000000002", function() {
-            calculation.height = 328;
-            calculation.additionalWeight = 8;
-            calculation.bodyWeight = 80;
-
-            calculation.calcMetric();
-            expect(calculation._res).toEqual(19.994880000000002);
-        });
-
     });
 
     describe("Check calcImperial()", function(){
@@ -376,7 +297,7 @@ describe("Calculation", function() {
             calculation.additionalWeight = 0;
             calculation.bodyWeight = 80;
 
-            calculation.calcImperial();
+            calculation.calc();
             expect(calculation._res).toEqual(10);
         });
 
@@ -385,7 +306,7 @@ describe("Calculation", function() {
             calculation.additionalWeight = 8;
             calculation.bodyWeight = 80;
 
-            calculation.calcImperial();
+            calculation.calc();
             expect(calculation._res).toEqual(20);
         });
 

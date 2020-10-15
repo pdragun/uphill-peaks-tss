@@ -77,10 +77,9 @@ export class Calculation {
      */    
     calculate() {
         if (this.getUnits() === 'metric') {
-            this.calcMetric();
-            return;
+            this.height = this.metersToFeets(this.height);
         }
-        this.calcImperial();
+        this.calc();
     }
 
     /**
@@ -92,23 +91,12 @@ export class Calculation {
     }
 
     /**
-     * Calculate with metric [m] unit
-     */
-    calcMetric() {
-        this._res = this._heightMetric();
-        if (this._isWeight()) {
-            this._res = this._weightMetric();
-        }
-        this._res += this.tss;
-    }
-
-    /**
      * Calculate with imperial [ft] unit
      */
-    calcImperial() {
-        this._res = this._heightImperial();
+    calc() {
+        this._res = this._height();
         if (this._isWeight()) {
-            this._res = this._weightImperial();
+            this._res = this._weight();
         }
         this._res += this.tss;
 	}
@@ -126,30 +114,12 @@ export class Calculation {
     }
 
     /**
-     * Count hrTSS points from ascent/descent [m]
-     * @private
-     * @returns {number}
-     */
-    _heightMetric() {
-        return this.metersToFeets(this.height) * 10 / 1000;
-    }
-
-    /**
      * Count TSS points from ascent/descent [ft]
      * @private
      * @returns {number}
      */
-    _heightImperial() {
+    _height() {
         return this.height * 10 / 1000;
-    }
-
-    /***
-     * Count TSS points from ascent/descent [m], additional weight and body weight
-     * @private
-     * @returns {number}
-     */
-    _weightMetric() {
-        return (this.metersToFeets(this.height) / 1000 * this.additionalWeight * 100 / this.bodyWeight) + (this.metersToFeets(this.height) * 10 / 1000);
     }
 
     /**
@@ -157,7 +127,7 @@ export class Calculation {
      * @private
      * @returns {number}
      */
-    _weightImperial() {
+    _weight() {
         return (this.height / 1000 * this.additionalWeight * 100 / this.bodyWeight) + (this.height * 10 / 1000);
     }
 
